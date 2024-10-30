@@ -23,7 +23,7 @@ type channel struct {
 	// Set of unconfirmed txID -> tx data. For tx resubmission
 	pendingTransactions map[string]txData
 	// Set of confirmed txID -> inclusion block. For determining if the channel is timed out
-	confirmedTransactions map[string]eth.BlockID
+	confirmedTransactions map[string]eth.L1BlockRef
 
 	// Inclusion block number of first confirmed TX
 	minInclusionBlock uint64
@@ -39,7 +39,7 @@ func newChannel(log log.Logger, metr metrics.Metricer, cfg ChannelConfig, rollup
 		cfg:                   cfg,
 		channelBuilder:        cb,
 		pendingTransactions:   make(map[string]txData),
-		confirmedTransactions: make(map[string]eth.BlockID),
+		confirmedTransactions: make(map[string]eth.BlockRef),
 		minInclusionBlock:     math.MaxUint64,
 	}
 }
@@ -62,8 +62,8 @@ func (c *channel) TxFailed(id string) {
 }
 
 // TxConfirmed marks a transaction as confirmed on L1. Returns a bool indicating
-// whether the channel timed out on chain.
-func (c *channel) TxConfirmed(id string, inclusionBlock eth.BlockID) bool {
+// whether the channel was invalidated.
+func (c *channel) TxConfirmed(id string, inclusionBlock eth.BlockRef, holoceneTime *uint64) bool {
 	c.metr.RecordBatchTxSuccess()
 	c.log.Debug("marked transaction as confirmed", "id", id, "block", inclusionBlock)
 	if _, ok := c.pendingTransactions[id]; !ok {
@@ -85,9 +85,9 @@ func (c *channel) TxConfirmed(id string, inclusionBlock eth.BlockID) bool {
 		c.log.Info("Channel is fully submitted", "id", c.ID(), "min_inclusion_block", c.minInclusionBlock, "max_inclusion_block", c.maxInclusionBlock)
 	}
 
-	// If this channel timed out, put the pending blocks back into the local saved blocks
-	// and then reset this state so it can try to build a new channel.
-	if c.isTimedOut() {
+	// If this channel timed out or if the confirmed tranactions straddle the Holocene activation time
+	// return true so that the the caller can reset the state abd build a new channel.
+	if c.isTimedOut() || c.straddlesActivation(holoceneTime) {
 		c.metr.RecordChannelTimedOut(c.ID())
 		c.log.Warn("Channel timed out", "id", c.ID(), "min_inclusion_block", c.minInclusionBlock, "max_inclusion_block", c.maxInclusionBlock)
 		return true
@@ -109,6 +109,24 @@ func (c *channel) isTimedOut() bool {
 	// to believe the channel timed out when it was valid. It would then resubmit the blocks needlessly.
 	// This wastes batcher funds but doesn't cause any problems for the chain progressing safe head.
 	return len(c.confirmedTransactions) > 0 && c.maxInclusionBlock-c.minInclusionBlock >= c.cfg.ChannelTimeout
+}
+
+// straddlesActivation returns true if at least one transaction
+// for the channel was confirmed before the supplied activation time and
+// at least one transaction was confirmed at or after the supplied activation time.
+func (c *channel) straddlesActivation(activationTime *uint64) bool {
+	if activationTime == nil {
+		return false
+	}
+	var before, after bool
+	for _, block := range c.confirmedTransactions {
+		if block.Time < *activationTime {
+			before = true
+		} else {
+			after = true
+		}
+	}
+	return before && after
 }
 
 // isFullySubmitted returns true if the channel has been fully submitted (all transactions are confirmed).

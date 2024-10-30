@@ -108,15 +108,15 @@ func (s *channelManager) TxFailed(_id txID) {
 	}
 }
 
-// TxConfirmed marks a transaction as confirmed on L1. Only if the channel timed out
-// the channelManager's state is modified.
-func (s *channelManager) TxConfirmed(_id txID, inclusionBlock eth.BlockID) {
+// TxConfirmed marks a transaction as confirmed on L1. Only if the channel was invalidated
+// on chain,  the channelManager's state is modified.
+func (s *channelManager) TxConfirmed(_id txID, inclusionBlock eth.BlockRef) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 	id := _id.String()
 	if channel, ok := s.txChannels[id]; ok {
 		delete(s.txChannels, id)
-		if timedOut := channel.TxConfirmed(id, inclusionBlock); timedOut {
+		if invalidated := channel.TxConfirmed(id, inclusionBlock, s.rollupCfg.HoloceneTime); invalidated {
 			s.handleChannelInvalidated(channel)
 		}
 	} else {
@@ -146,7 +146,8 @@ func (s *channelManager) rewindToBlock(block eth.BlockID) {
 func (s *channelManager) handleChannelInvalidated(c *channel) {
 	if len(c.channelBuilder.blocks) > 0 {
 		// This is usually true, but there is an edge case
-		// where a channel timed out before any blocks got added.
+		// where a channel was invalidated (e.g. timed out)
+		// before any blocks got added.
 		// In that case we end up with an empty frame (header only),
 		// and there are no blocks to requeue.
 		blockID := eth.ToBlockID(c.channelBuilder.blocks[0])
