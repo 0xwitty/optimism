@@ -26,6 +26,7 @@ import (
 	"github.com/ethereum-optimism/optimism/op-node/rollup/derive"
 	"github.com/ethereum-optimism/optimism/op-service/dial"
 	"github.com/ethereum-optimism/optimism/op-service/eth"
+	"github.com/ethereum-optimism/optimism/op-service/retry"
 	"github.com/ethereum-optimism/optimism/op-service/txmgr"
 )
 
@@ -510,9 +511,17 @@ func (l *BatchSubmitter) processReceiptsLoop(ctx context.Context, receiptsCh cha
 				l.Log.Info("txpool may no longer be blocked", "err", r.Err)
 			}
 			l.Log.Info("Handling receipt", "id", r.ID)
-			l.handleReceipt(r)
+			err := l.handleReceipt(r)
+			if err != nil {
+				// This error may be caused when we cannot get the block
+				// referenced (by number) in the receipt.
+				// In this case we would potetntially not detect
+				// a channel being invalidated on chain (timing out
+				// or straddling Holocene activation).
+				l.Log.Error("Error handling receipt", "error", err)
+			}
 		case <-ctx.Done():
-			l.Log.Info("Receipt processing loop done")
+			l.Log.Info("Receipts processing loop done")
 			return
 		}
 	}
@@ -904,7 +913,9 @@ func (l *BatchSubmitter) recordConfirmedTx(id txID, receipt *types.Receipt) erro
 	l.Log.Info("Transaction confirmed", logFields(id, receipt)...)
 	tctx, cancel := context.WithTimeout(l.shutdownCtx, l.Config.NetworkTimeout)
 	defer cancel()
-	header, err := l.L1Client.HeaderByNumber(tctx, receipt.BlockNumber)
+	header, err := retry.Do(tctx, 3, retry.Fixed(1), func() (*types.Header, error) {
+		return l.L1Client.HeaderByNumber(tctx, receipt.BlockNumber)
+	})
 	if err != nil {
 		return err
 	}
