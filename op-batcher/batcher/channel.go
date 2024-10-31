@@ -85,11 +85,18 @@ func (c *channel) TxConfirmed(id string, inclusionBlock eth.BlockRef, holoceneTi
 		c.log.Info("Channel is fully submitted", "id", c.ID(), "min_inclusion_block", c.minInclusionBlock, "max_inclusion_block", c.maxInclusionBlock)
 	}
 
-	// If this channel timed out or if the confirmed tranactions straddle the Holocene activation time
+	// If this channel timed out
 	// return true so that the the caller can reset the state and build a new channel.
-	if c.isTimedOut() || c.straddlesActivation(holoceneTime) {
+	if c.isTimedOut() {
 		c.metr.RecordChannelTimedOut(c.ID())
-		c.log.Warn("Channel timed out", "id", c.ID(), "min_inclusion_block", c.minInclusionBlock, "max_inclusion_block", c.maxInclusionBlock)
+		c.log.Warn("Channel timed out, invalidating", "id", c.ID(), "min_inclusion_block", c.minInclusionBlock, "max_inclusion_block", c.maxInclusionBlock)
+		return true
+	}
+
+	// If this channel had confirmed tranactions straddling the Holocene activation time
+	// return true so that the the caller can reset the state and build a new channel.
+	if c.straddlesActivation(holoceneTime) {
+		c.log.Warn("Channel straddled Holocene activation time, invalidating", "id", c.ID(), "min_inclusion_block", c.minInclusionBlock, "max_inclusion_block", c.maxInclusionBlock)
 		return true
 	}
 
