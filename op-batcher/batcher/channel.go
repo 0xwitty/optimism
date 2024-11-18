@@ -93,7 +93,7 @@ func (c *channel) TxConfirmed(id string, inclusionBlock eth.BlockRef, holoceneTi
 		return true
 	}
 
-	// If this channel had confirmed tranactions straddling the Holocene activation time
+	// If this channel had confirmed transactions straddling the Holocene activation time
 	// return true so that the the caller can reset the state and build a new channel.
 	if c.straddlesActivation(holoceneTime) {
 		c.log.Warn("Channel straddled Holocene activation time, invalidating", "id", c.ID(), "min_inclusion_block", c.minInclusionBlock, "max_inclusion_block", c.maxInclusionBlock)
