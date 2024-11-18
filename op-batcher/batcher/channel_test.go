@@ -64,8 +64,8 @@ func TestChannelTimeout(t *testing.T) {
 	require.False(t, timeout)
 
 	// Manually confirm transactions
-	channel.TxConfirmed(zeroFrameTxID(0).String(), eth.BlockRef{Number: 0}, nil)
-	channel.TxConfirmed(zeroFrameTxID(1).String(), eth.BlockRef{Number: 99}, nil)
+	channel.TxConfirmed(zeroFrameTxID(0).String(), eth.BlockRef{Number: 0})
+	channel.TxConfirmed(zeroFrameTxID(1).String(), eth.BlockRef{Number: 99})
 
 	// Since the ChannelTimeout is 100, the
 	// pending channel should not be timed out
@@ -74,7 +74,7 @@ func TestChannelTimeout(t *testing.T) {
 
 	// Add a confirmed transaction with a higher number
 	// than the ChannelTimeout
-	channel.TxConfirmed(zeroFrameTxID(2).String(), eth.BlockRef{Number: 101}, nil)
+	channel.TxConfirmed(zeroFrameTxID(2).String(), eth.BlockRef{Number: 101})
 
 	// Now the pending channel should be timed out
 	timeout = channel.isTimedOut()

@@ -63,7 +63,7 @@ func (c *channel) TxFailed(id string) {
 
 // TxConfirmed marks a transaction as confirmed on L1. Returns a bool indicating
 // whether the channel was invalidated.
-func (c *channel) TxConfirmed(id string, inclusionBlock eth.BlockRef, holoceneTime *uint64) bool {
+func (c *channel) TxConfirmed(id string, inclusionBlock eth.BlockRef) bool {
 	c.metr.RecordBatchTxSuccess()
 	c.log.Debug("marked transaction as confirmed", "id", id, "block", inclusionBlock)
 	if _, ok := c.pendingTransactions[id]; !ok {
@@ -95,7 +95,7 @@ func (c *channel) TxConfirmed(id string, inclusionBlock eth.BlockRef, holoceneTi
 
 	// If this channel had confirmed transactions straddling the Holocene activation time
 	// return true so that the the caller can reset the state and build a new channel.
-	if c.straddlesActivation(holoceneTime) {
+	if c.straddlesActivation(c.channelBuilder.rollupCfg.HoloceneTime) {
 		c.log.Warn("Channel straddled Holocene activation time, invalidating", "id", c.ID(), "min_inclusion_block", c.minInclusionBlock, "max_inclusion_block", c.maxInclusionBlock)
 		return true
 	}

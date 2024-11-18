@@ -116,7 +116,7 @@ func (s *channelManager) TxConfirmed(_id txID, inclusionBlock eth.BlockRef) {
 	id := _id.String()
 	if channel, ok := s.txChannels[id]; ok {
 		delete(s.txChannels, id)
-		if invalidated := channel.TxConfirmed(id, inclusionBlock, s.rollupCfg.HoloceneTime); invalidated {
+		if invalidated := channel.TxConfirmed(id, inclusionBlock); invalidated {
 			s.handleChannelInvalidated(channel)
 		}
 	} else {
