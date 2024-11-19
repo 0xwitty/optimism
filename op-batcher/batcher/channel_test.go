@@ -316,3 +316,31 @@ func TestChannelTxFailed(t *testing.T) {
 	// There should be a frame in the pending channel now
 	require.Equal(t, 1, m.currentChannel.PendingFrames())
 }
+
+func TestChannelStraddlesActivation(t *testing.T) {
+	ch := &channel{
+		confirmedTransactions: make(map[string]eth.BlockRef),
+	}
+
+	hardforkTime := uint64(77)
+
+	// [before] => not straddling
+	ch.confirmedTransactions["first"] = eth.BlockRef{Time: 76}
+	res := ch.straddlesActivation(&hardforkTime)
+	require.False(t, res)
+
+	// [before, at] => straddling
+	ch.confirmedTransactions["last"] = eth.BlockRef{Time: 77}
+	res = ch.straddlesActivation(&hardforkTime)
+	require.True(t, res)
+
+	// [before, after] => straddling
+	ch.confirmedTransactions["last"] = eth.BlockRef{Time: 78}
+	res = ch.straddlesActivation(&hardforkTime)
+	require.True(t, res)
+
+	// [at, after] => not straddling
+	ch.confirmedTransactions["first"] = eth.BlockRef{Time: 77}
+	res = ch.straddlesActivation(&hardforkTime)
+	require.False(t, res)
+}
