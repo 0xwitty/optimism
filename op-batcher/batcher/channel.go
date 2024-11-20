@@ -14,9 +14,10 @@ import (
 // channel is a lightweight wrapper around a ChannelBuilder which keeps track of pending
 // and confirmed transactions for a single channel.
 type channel struct {
-	log  log.Logger
-	metr metrics.Metricer
-	cfg  ChannelConfig
+	log       log.Logger
+	metr      metrics.Metricer
+	cfg       ChannelConfig
+	rollupCfg *rollup.Config
 
 	// pending channel builder
 	channelBuilder *ChannelBuilder
@@ -37,6 +38,7 @@ func newChannel(log log.Logger, metr metrics.Metricer, cfg ChannelConfig, rollup
 		log:                   log,
 		metr:                  metr,
 		cfg:                   cfg,
+		rollupCfg:             rollupCfg,
 		channelBuilder:        cb,
 		pendingTransactions:   make(map[string]txData),
 		confirmedTransactions: make(map[string]eth.BlockRef),
@@ -95,7 +97,7 @@ func (c *channel) TxConfirmed(id string, inclusionBlock eth.BlockRef) bool {
 
 	// If this channel had confirmed transactions straddling the Holocene activation time
 	// return true so that the the caller can reset the state and build a new channel.
-	if c.straddlesActivation(c.channelBuilder.rollupCfg.HoloceneTime) {
+	if c.straddlesActivation(c.rollupCfg.HoloceneTime) {
 		c.log.Warn("Channel straddled Holocene activation time, invalidating", "id", c.ID(), "min_inclusion_block", c.minInclusionBlock, "max_inclusion_block", c.maxInclusionBlock)
 		return true
 	}
