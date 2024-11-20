@@ -494,7 +494,7 @@ func (l *BatchSubmitter) mainLoop(ctx context.Context, receiptsCh chan txmgr.TxR
 }
 
 // processReceiptsLoop handles transaction receipts from the DA layer
-func (l *BatchSubmitter) processReceiptsLoop(ctx context.Context, receiptsCh chan txmgr.TxReceipt[txRef]) {
+func (l *BatchSubmitter) processReceipstsLoop(ctx context.Context, receiptsCh chan txmgr.TxReceipt[txRef]) {
 	defer l.wg.Done()
 	l.Log.Info("Starting receipts processing loop")
 	for {
@@ -908,9 +908,17 @@ func (l *BatchSubmitter) recordConfirmedTx(id txID, receipt *types.Receipt) {
 	var err error
 	for {
 		header, err = l.L1Client.HeaderByNumber(tctx, receipt.BlockNumber)
-		if err != nil {
+		if err == nil {
 			break
 		}
+		l.Log.Warn("Getting header for receipt failed, retrying.", "err", err)
+		time.Sleep(2 * time.Second)
+	}
+
+	if header.Hash() != receipt.BlockHash {
+		l.Log.Error("Block hash from HeaderByNumber does not match hash fromreceipt",
+			"receiptHash", receipt.BlockHash, "headerHash", header.Hash())
+		return
 	}
 
 	l.state.TxConfirmed(id, eth.InfoToL1BlockRef(eth.HeaderBlockInfo(header)))
