@@ -494,7 +494,7 @@ func (l *BatchSubmitter) mainLoop(ctx context.Context, receiptsCh chan txmgr.TxR
 }
 
 // processReceiptsLoop handles transaction receipts from the DA layer
-func (l *BatchSubmitter) processReceipstsLoop(ctx context.Context, receiptsCh chan txmgr.TxReceipt[txRef]) {
+func (l *BatchSubmitter) processReceiptsLoop(ctx context.Context, receiptsCh chan txmgr.TxReceipt[txRef]) {
 	defer l.wg.Done()
 	l.Log.Info("Starting receipts processing loop")
 	for {
