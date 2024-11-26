@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity 0.8.25;
+pragma solidity 0.8.15;
 
 import { IPreimageOracle } from "src/cannon/interfaces/IPreimageOracle.sol";
 import { IBigStepper } from "src/dispute/interfaces/IBigStepper.sol";
