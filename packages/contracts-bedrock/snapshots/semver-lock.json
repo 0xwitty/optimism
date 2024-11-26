@@ -135,10 +135,6 @@
     "initCodeHash": "0xfdd3e9806644df2d6091f2a48a66ddd4f903e5c6df25f62623ab16978670710b",
     "sourceCodeHash": "0x1e8e3c072c8f2cb2640c1dfbbb8d610f408554e75e334c6e1791e4aea8687e2c"
   },
-  "src/asterisc/RISCV.sol": {
-    "initCodeHash": "0x105f91a7b6b50c4e61f448a81da5f9a69831aa82472b34ca22cc77856dda9f99",
-    "sourceCodeHash": "0xa859624f24ce304b517d7a5b7d545f0967ad5dd5de2b453dbc9f30089310f4d2"
-  },
   "src/cannon/MIPS.sol": {
     "initCodeHash": "0xac576a1789a0a979a8506ab427032fb008d119e93592bec083e261debdc8cbbf",
     "sourceCodeHash": "0x0542ab41f2a05762b719a0753cbc6e8c02b679ca61b6364a68f08426e881def8"
@@ -215,12 +211,16 @@
     "initCodeHash": "0xc07d0f5d36fa44b2390531c9e3a815e780397e95b19c674abe85d4bfc3f7b8dd",
     "sourceCodeHash": "0xd6c73c8022913caca98b06e35bbb859ec9b9aa72fc8c0619124854e8086174cd"
   },
+  "src/vendor/asterisc/RISCV.sol": {
+    "initCodeHash": "0xb57658620cdf32b56bf5652cae5820a3392aead542258097d97ae6a640bb4373",
+    "sourceCodeHash": "0xb363563cd109bf82d6ba09f3f6c2ef95f1c20e95ead3d0e85dea6e124265d021"
+  },
   "src/vendor/eas/EAS.sol": {
-    "initCodeHash": "0xa14eb39bfec89cfdae469a626f27f4571df6d466da0a5acbe172e5f3d2de2458",
+    "initCodeHash": "0x2a7b567fb33f8797b4b8cbb9c53ce422a5daecc6c4bd1565bbb70545625878b4",
     "sourceCodeHash": "0x3b5ec0d50a6974f9114efbefee1863f0782f74efdb1fbc7fa031a6f88477221b"
   },
   "src/vendor/eas/SchemaRegistry.sol": {
-    "initCodeHash": "0xabbaa8e3bef18f3f18e1c61a5a9c4b2bd9dd7240e5c93a610f6b153bb0561db4",
+    "initCodeHash": "0xac1bceaa3cb471af950b806edb86bf05ac8b5e4463b617a3f529cc206d7c0e79",
     "sourceCodeHash": "0x4a02c5f2cb4f30a037d326a23a62485095c76836caa3c1d7a52765bcf394bcc1"
   }
 }
