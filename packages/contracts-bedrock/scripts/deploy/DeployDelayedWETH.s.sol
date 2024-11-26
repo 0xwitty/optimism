@@ -195,7 +195,7 @@ contract DeployDelayedWETH is Script {
         vm.broadcast(msg.sender);
         IProxy proxy = IProxy(
             DeployUtils.create1({
-                _name: "Proxy",
+                _name: "forge-artifacts/Proxy.sol/Proxy.json",
                 _args: DeployUtils.encodeConstructor(abi.encodeCall(IProxy.__constructor__, (msg.sender)))
             })
         );

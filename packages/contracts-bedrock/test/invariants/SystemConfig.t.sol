@@ -13,7 +13,7 @@ contract SystemConfig_GasLimitBoundaries_Invariant is Test {
     function setUp() external {
         IProxy proxy = IProxy(
             DeployUtils.create1({
-                _name: "Proxy",
+                _name: "forge-artifacts/Proxy.sol/Proxy.json",
                 _args: DeployUtils.encodeConstructor(abi.encodeCall(IProxy.__constructor__, (msg.sender)))
             })
         );

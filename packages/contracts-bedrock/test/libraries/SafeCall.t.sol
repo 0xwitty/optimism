@@ -122,9 +122,9 @@ contract SafeCall_Test is Test {
         for (uint64 i = 40_000; i < 100_000; i++) {
             uint256 snapshot = vm.snapshot();
 
-            // 65_922 is the exact amount of gas required to make the safe call
+            // 65_914 is the exact amount of gas required to make the safe call
             // successfully.
-            if (i < 65_922) {
+            if (i < 65_914) {
                 assertFalse(caller.makeSafeCall(i, 25_000));
             } else {
                 vm.expectCallMinGas(address(caller), 0, 25_000, abi.encodeCall(caller.setA, (1)));
@@ -142,9 +142,9 @@ contract SafeCall_Test is Test {
         for (uint64 i = 15_200_000; i < 15_300_000; i++) {
             uint256 snapshot = vm.snapshot();
 
-            // 15_278_621 is the exact amount of gas required to make the safe call
+            // 15_278_613 is the exact amount of gas required to make the safe call
             // successfully.
-            if (i < 15_278_621) {
+            if (i < 15_278_613) {
                 assertFalse(caller.makeSafeCall(i, 15_000_000));
             } else {
                 vm.expectCallMinGas(address(caller), 0, 15_000_000, abi.encodeCall(caller.setA, (1)));

@@ -328,7 +328,7 @@ contract DeployImplementations_Test is Test {
         );
         superchainConfigProxy = ISuperchainConfig(
             DeployUtils.create1({
-                _name: "Proxy",
+                _name: "forge-artifacts/Proxy.sol/Proxy.json",
                 _args: DeployUtils.encodeConstructor(
                     abi.encodeCall(IProxy.__constructor__, (address(superchainProxyAdmin)))
                 )
